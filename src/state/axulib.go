@@ -123,8 +123,10 @@ func (self *luaState) LoadFile(filename string) int {
 func (self *luaState) LoadFileX(filename, mode string) int {
 	if data, err := os.ReadFile(filename); err == nil {
 		return self.Load(data, "@"+filename, mode)
+	} else {
+		self.PushString(err.Error())
+		return LUA_ERRFILE
 	}
-	return LUA_ERRFILE
 }
 
 // 加载字符串
