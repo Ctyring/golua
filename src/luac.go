@@ -3,7 +3,6 @@ package main
 import (
 	"lua/src/api"
 	. "lua/src/binchunk"
-	"lua/src/state"
 	"lua/src/util"
 	"os"
 )
@@ -99,19 +98,24 @@ func pmain(L api.LuaState) int {
 	if listing {
 		util.List(f)
 	}
+	if dumping {
+		data := Dump(*f)
+		os.OpenFile(output, os.O_CREATE|os.O_WRONLY, 0666)
+		os.WriteFile(output, data, 0666)
+	}
 	return 0
 }
 
-func main() {
-	i := doArgs(len(os.Args), os.Args)
-	os.Args = append(os.Args[:0], os.Args[i:]...)
-	if len(os.Args) <= 0 {
-		panic("no input files")
-	}
-	L := state.New()
-	if L == nil {
-		panic("cannot create state: not enough memory")
-	}
-	L.PushGoFunction(pmain)
-	L.Call(0, 0)
-}
+//func main() {
+//	i := doArgs(len(os.Args), os.Args)
+//	os.Args = append(os.Args[:0], os.Args[i:]...)
+//	if len(os.Args) <= 0 {
+//		panic("no input files")
+//	}
+//	L := state.New()
+//	if L == nil {
+//		panic("cannot create state: not enough memory")
+//	}
+//	L.PushGoFunction(pmain)
+//	L.Call(0, 0)
+//}
