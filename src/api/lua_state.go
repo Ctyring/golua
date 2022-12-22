@@ -1,5 +1,7 @@
 package api
 
+import . "lua/src/binchunk"
+
 type LuaType = int
 type ArithOp = int
 type CompareOp = int
@@ -86,11 +88,12 @@ type BasicAPI interface {
 	Yield(nResults int) int                        // 挂起一个协程
 	Status() int                                   // 获取协程的状态
 
-	IsYieldable() bool         // 判断当前协程是否可以挂起
-	ToThread(idx int) LuaState // 将指定索引处的值转换成协程
-	PushThread() bool          // 将当前协程压入栈顶
-	XMove(to LuaState, n int)  // 用于在两个协程栈之间移动元素
-	GetStack() bool            // 获取栈帧
+	IsYieldable() bool          // 判断当前协程是否可以挂起
+	ToThread(idx int) LuaState  // 将指定索引处的值转换成协程
+	PushThread() bool           // 将当前协程压入栈顶
+	XMove(to LuaState, n int)   // 用于在两个协程栈之间移动元素
+	GetStack() bool             // 获取栈帧
+	ToProto(idx int) *Prototype // 将指定索引处的值转换成原型
 }
 
 type LuaState interface {

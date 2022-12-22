@@ -2,7 +2,9 @@ package main
 
 import (
 	"lua/src/api"
+	. "lua/src/binchunk"
 	"lua/src/state"
+	"lua/src/util"
 	"os"
 )
 
@@ -11,6 +13,24 @@ var output = "luac.out"
 var listing = false
 var dumping = true
 var stripping = false
+
+// 实现多个文件的编译聚合
+func combine(L api.LuaState, n int) *Prototype {
+	if n == 1 {
+		return L.ToProto(-1)
+	}
+	proto := new(Prototype)
+	proto.Source = "=(" + progname + ")"
+	for i := 0; i < n; i++ {
+		subProto := L.ToProto(-1)
+		L.Remove(-1)
+		proto.Protos = append(proto.Protos, subProto)
+		if len(subProto.Upvalues) > 0 {
+			proto.Protos[i].Upvalues[0].Instack = 0
+		}
+	}
+	return proto
+}
 
 // 参数处理
 func doArgs(argc int, argv []string) int {
@@ -75,6 +95,10 @@ func pmain(L api.LuaState) int {
 			panic(L.ToString(-1))
 		}
 	}
+	f := combine(L, len(os.Args))
+	if listing {
+		util.List(f)
+	}
 	return 0
 }
 
@@ -89,4 +113,5 @@ func main() {
 		panic("cannot create state: not enough memory")
 	}
 	L.PushGoFunction(pmain)
+	L.Call(0, 0)
 }

@@ -3,6 +3,7 @@ package state
 import (
 	"fmt"
 	. "lua/src/api"
+	"lua/src/binchunk"
 )
 
 func (self *luaState) RawLen(idx int) uint {
@@ -195,6 +196,16 @@ func (self *luaState) ToThread(idx int) LuaState {
 		if thread, ok := val.(*luaState); ok {
 			return thread
 		}
+	}
+	return nil
+}
+
+// 将制定索引处的值转换为函数原型
+func (self *luaState) ToProto(idx int) *binchunk.Prototype {
+	val := self.stack.get(idx)
+	if c, ok := val.(*closure); ok {
+		return c.proto
+
 	}
 	return nil
 }

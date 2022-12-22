@@ -65,7 +65,7 @@ const (
 )
 
 type Upvalue struct {
-	Instack byte // 是否在寄存器中
+	Instack byte // 是否在寄存器(栈)中
 	Idx     byte // 寄存器索引或upvalue索引
 }
 
