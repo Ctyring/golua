@@ -14,7 +14,7 @@ func toProto(fi *funcInfo) *Prototype {
 		Protos:       toProtos(fi.subFuncs), // 子函数原型表
 		LineInfo:     []uint32{},            // debug info
 		LocVars:      []LocVar{},            // debug info
-		UpvalueNames: []string{},            // debug info
+		UpvalueNames: fi.upvalNames,         // debug info
 	}
 
 	if proto.MaxStackSize < 2 {

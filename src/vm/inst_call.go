@@ -9,7 +9,6 @@ import (
 func closure(i Instruction, vm api.LuaVM) {
 	a, bx := i.ABx()
 	a += 1
-
 	// 加载子函数原型表
 	vm.LoadProto(bx)
 	vm.Replace(a)

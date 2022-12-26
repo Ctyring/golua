@@ -4,6 +4,7 @@ import (
 	"lua/src/api"
 	"lua/src/binchunk"
 	"lua/src/compiler"
+	"lua/src/util"
 	vm2 "lua/src/vm"
 )
 
@@ -15,6 +16,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	} else {
 		proto = compiler.Compile(string(chunk), chunkName) // 编译文本chunk
 	}
+	util.List(proto)
 	c := newLuaClosure(proto)
 	self.stack.push(c)
 	// 判断是否需要Upvalue
@@ -119,7 +121,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 // 执行被调函数
 func (self *luaState) runLuaClosure() {
 	for {
-		//printStack(self)
+		util.PrintStack(self)
 		inst := vm2.Instruction(self.Fetch())
 		inst.Execute(self)
 		if inst.Opcode() == vm2.OP_RETURN {

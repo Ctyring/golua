@@ -6,7 +6,7 @@ import (
 	"lua/src/binchunk"
 )
 
-func printStack(ls LuaState) {
+func PrintStack(ls LuaState) {
 	top := ls.GetTop()
 	for i := 1; i <= top; i++ {
 		t := ls.Type(i)
