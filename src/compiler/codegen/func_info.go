@@ -92,7 +92,6 @@ func (self *funcInfo) indexOfUpval(name string) int {
 			return idx
 		}
 		if idx := self.parent.indexOfUpval(name); idx >= 0 { // 如果是在外围函数的Upvalue表中(不用捕获)
-			idx := len(self.upvalues)
 			self.upvalues[name] = upvalInfo{-1, idx, idx}
 			self.upvalNames = append(self.upvalNames, name)
 			return idx

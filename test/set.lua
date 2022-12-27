@@ -3,8 +3,8 @@
 --- Created by Lenovo.
 --- DateTime: 2022/12/26 13:58
 ---
-Set = {}
-mt = {}
+local Set = {}
+local mt = {}
 -- 使用指定的列表创建一个新的集合
 function Set.new(l)
     local set = {}
