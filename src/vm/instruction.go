@@ -60,7 +60,7 @@ func (self Instruction) CMode() byte {
 
 func (self Instruction) Execute(vm api.LuaVM) {
 	action := opcodes[self.Opcode()].action
-	println("action:", opcodes[self.Opcode()].name)
+	//println("action:", opcodes[self.Opcode()].name)
 	if action != nil {
 		action(self, vm)
 	} else {

@@ -1,59 +1,59 @@
 package codegen
 
 import (
-	ast2 "lua/src/compiler/ast"
+	. "lua/src/compiler/ast"
 )
 
-func cgStat(fi *funcInfo, node ast2.Stat) {
+func cgStat(fi *funcInfo, node Stat) {
 	switch stat := node.(type) {
-	case *ast2.FuncCallStat:
+	case *FuncCallStat:
 		cgFuncCallStat(fi, stat)
-	case *ast2.BreakStat:
+	case *BreakStat:
 		cgBreakStat(fi, stat)
-	case *ast2.DoStat:
+	case *DoStat:
 		cgDoStat(fi, stat)
-	case *ast2.WhileStat:
+	case *WhileStat:
 		cgWhileStat(fi, stat)
-	case *ast2.RepeatStat:
+	case *RepeatStat:
 		cgRepeatStat(fi, stat)
-	case *ast2.IfStat:
+	case *IfStat:
 		cgIfStat(fi, stat)
-	case *ast2.ForNumStat:
+	case *ForNumStat:
 		cgForNumStat(fi, stat)
-	case *ast2.ForInStat:
+	case *ForInStat:
 		cgForInStat(fi, stat)
-	case *ast2.AssignStat:
+	case *AssignStat:
 		cgAssignStat(fi, stat)
-	case *ast2.LocalVarDeclStat:
+	case *LocalVarDeclStat:
 		cgLocalVarDeclStat(fi, stat)
-	case *ast2.LocalFuncDefStat:
+	case *LocalFuncDefStat:
 		cgLocalFuncDefStat(fi, stat)
-	case *ast2.LabelStat, *ast2.GotoStat:
+	case *LabelStat, *GotoStat:
 		panic("label and goto statements are not supported!")
 	}
 }
 
 // 生成局部函数定义语句
-func cgLocalFuncDefStat(fi *funcInfo, node *ast2.LocalFuncDefStat) {
+func cgLocalFuncDefStat(fi *funcInfo, node *LocalFuncDefStat) {
 	r := fi.addLocVar(node.Name)  // 为函数名分配一个寄存器
 	cgFuncDefExp(fi, node.Exp, r) // 生成函数定义指令
 }
 
 // 生成函数调用语句
-func cgFuncCallStat(fi *funcInfo, node *ast2.FuncCallStat) {
+func cgFuncCallStat(fi *funcInfo, node *FuncCallStat) {
 	r := fi.allocReg()            // 为函数调用分配一个寄存器
 	cgFuncCallExp(fi, node, r, 0) // 生成函数调用指令
 	fi.freeReg()                  // 释放寄存器
 }
 
 // 生成break语句
-func cgBreakStat(fi *funcInfo, node *ast2.BreakStat) {
+func cgBreakStat(fi *funcInfo, node *BreakStat) {
 	pc := fi.emitJmp(0, 0) // 生成跳转指令(等到确定跳转位置时再填充跳转偏移)
 	fi.addBreakJmp(pc)     // 将跳转指令的pc加入break列表
 }
 
 // 生成do语句
-func cgDoStat(fi *funcInfo, node *ast2.DoStat) {
+func cgDoStat(fi *funcInfo, node *DoStat) {
 	fi.enterScope(false) // 非循环块
 	cgBlock(fi, node.Block)
 	fi.closeOpenUpvals() // 关闭未关闭的upvalue
@@ -61,7 +61,7 @@ func cgDoStat(fi *funcInfo, node *ast2.DoStat) {
 }
 
 // 生成while语句
-func cgWhileStat(fi *funcInfo, node *ast2.WhileStat) {
+func cgWhileStat(fi *funcInfo, node *WhileStat) {
 	pcBeforeExp := fi.pc()                    // 记录下while语句的起始位置
 	r := fi.allocReg()                        // 为while表达式分配一个寄存器
 	cgExp(fi, node.Exp, r, 1)                 // 生成while表达式
@@ -77,7 +77,7 @@ func cgWhileStat(fi *funcInfo, node *ast2.WhileStat) {
 }
 
 // 生成repeat语句
-func cgRepeatStat(fi *funcInfo, node *ast2.RepeatStat) {
+func cgRepeatStat(fi *funcInfo, node *RepeatStat) {
 	fi.enterScope(true)                    // 进入循环块
 	pcBeforeBlock := fi.pc()               // 记录下repeat语句的起始位置
 	cgBlock(fi, node.Block)                // 生成块
@@ -91,7 +91,7 @@ func cgRepeatStat(fi *funcInfo, node *ast2.RepeatStat) {
 }
 
 // 生成if语句
-func cgIfStat(fi *funcInfo, node *ast2.IfStat) {
+func cgIfStat(fi *funcInfo, node *IfStat) {
 	pcJmpToEnds := make([]int, len(node.Exps)) // 用于记录每个分支的跳转指令的pc
 	pcJmpToNextExp := -1                       // 用于记录跳转到下一个分支的跳转指令的pc
 
@@ -123,11 +123,11 @@ func cgIfStat(fi *funcInfo, node *ast2.IfStat) {
 }
 
 // 生成数值for语句
-func cgForNumStat(fi *funcInfo, node *ast2.ForNumStat) {
-	fi.enterScope(true)                           // 进入循环块
-	cgLocalVarDeclStat(fi, &ast2.LocalVarDeclStat{ // 生成局部变量声明语句。三个特殊的局部变量分别是循环变量、循环变量的初始值、循环变量的终止值
+func cgForNumStat(fi *funcInfo, node *ForNumStat) {
+	fi.enterScope(true)                       // 进入循环块
+	cgLocalVarDeclStat(fi, &LocalVarDeclStat{ // 生成局部变量声明语句。三个特殊的局部变量分别是循环变量、循环变量的初始值、循环变量的终止值
 		NameList: []string{"(for index)", "for limit", "for step"},
-		ExpList:  []ast2.Exp{node.InitExp, node.LimitExp, node.StepExp},
+		ExpList:  []Exp{node.InitExp, node.LimitExp, node.StepExp},
 	})
 	fi.addLocVar(node.VarName) // 添加循环变量
 	a := fi.usedRegs - 4
@@ -141,9 +141,9 @@ func cgForNumStat(fi *funcInfo, node *ast2.ForNumStat) {
 }
 
 // 生成泛型for语句
-func cgForInStat(fi *funcInfo, node *ast2.ForInStat) {
+func cgForInStat(fi *funcInfo, node *ForInStat) {
 	fi.enterScope(true) // 进入循环块
-	cgLocalVarDeclStat(fi, &ast2.LocalVarDeclStat{
+	cgLocalVarDeclStat(fi, &LocalVarDeclStat{
 		NameList: []string{"(for generator)", "(for state)", "(for control)"},
 		ExpList:  node.ExpList,
 	})
@@ -161,7 +161,7 @@ func cgForInStat(fi *funcInfo, node *ast2.ForInStat) {
 }
 
 // 生成局部变量声明语句
-func cgLocalVarDeclStat(fi *funcInfo, node *ast2.LocalVarDeclStat) {
+func cgLocalVarDeclStat(fi *funcInfo, node *LocalVarDeclStat) {
 	exps := removeTailNils(node.ExpList)
 	nExps := len(exps)
 	nName := len(node.NameList)
@@ -207,7 +207,7 @@ func cgLocalVarDeclStat(fi *funcInfo, node *ast2.LocalVarDeclStat) {
 }
 
 // 赋值语句
-func cgAssignStat(fi *funcInfo, node *ast2.AssignStat) {
+func cgAssignStat(fi *funcInfo, node *AssignStat) {
 	exps := removeTailNils(node.ExpList)
 	nExps := len(exps)
 	nVars := len(node.VarList)
@@ -218,13 +218,13 @@ func cgAssignStat(fi *funcInfo, node *ast2.AssignStat) {
 	oldRegs := fi.usedRegs
 
 	for i, exp := range node.VarList {
-		if taExp, ok := exp.(*ast2.TableAccessExp); ok { // 如果是表访问表达式
+		if taExp, ok := exp.(*TableAccessExp); ok { // 如果是表访问表达式
 			tRegs[i] = fi.allocReg()                // 为表分配寄存器
 			cgExp(fi, taExp.PrefixExp, tRegs[i], 1) // 生成表达式
 			kRegs[i] = fi.allocReg()                // 为键分配寄存器
 			cgExp(fi, taExp.KeyExp, kRegs[i], 1)    // 生成键表达式
 		} else { // 如果是变量
-			name := exp.(*ast2.NameExp).Name
+			name := exp.(*NameExp).Name
 			if fi.slotOfLocVar(name) < 0 && fi.indexOfUpval(name) < 0 { // 如果变量不是局部变量也不是upvalue，说明是全局变量
 				// global var
 				kRegs[i] = -1
@@ -268,7 +268,7 @@ func cgAssignStat(fi *funcInfo, node *ast2.AssignStat) {
 	}
 
 	for i, exp := range node.VarList { // 遍历变量列表
-		if nameExp, ok := exp.(*ast2.NameExp); ok { // 如果是变量名
+		if nameExp, ok := exp.(*NameExp); ok { // 如果是变量名
 			varName := nameExp.Name
 			if a := fi.slotOfLocVar(varName); a >= 0 {
 				fi.emitMove(a, vRegs[i]) // 生成move指令

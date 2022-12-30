@@ -6,6 +6,16 @@ import (
 	. "lua/src/vm"
 )
 
+// kind of operands
+const (
+	ARG_CONST = 1 // const index
+	ARG_REG   = 2 // register index
+	ARG_UPVAL = 4 // upvalue index
+	ARG_RK    = ARG_REG | ARG_CONST
+	ARG_RU    = ARG_REG | ARG_UPVAL
+	ARG_RUK   = ARG_REG | ARG_UPVAL | ARG_CONST
+)
+
 func cgExp(fi *funcInfo, node Exp, a, n int) {
 	switch exp := node.(type) {
 	case *NilExp:
@@ -218,11 +228,14 @@ func cgTailCallExp(fi *funcInfo, node *FuncCallExp, a int) {
 func prepFuncCall(fi *funcInfo, node *FuncCallExp, a int) int {
 	nArgs := len(node.Args)
 	lastArgIsVarargOrFuncCall := false
-
 	cgExp(fi, node.PrefixExp, a, 1) // 处理前缀表达式
 	if node.NameExp != nil {        // 处理语法糖
-		c := 0x100 + fi.indexOfConstant(node.NameExp.Name)
+		fi.allocReg()
+		c, k := expToOpArg(fi, node.NameExp, ARG_RK)
 		fi.emitSelf(a, a, c)
+		if k == ARG_REG {
+			fi.freeRegs(1)
+		}
 	}
 	for i, arg := range node.Args { // 处理参数
 		tmp := fi.allocReg()
@@ -243,4 +256,44 @@ func prepFuncCall(fi *funcInfo, node *FuncCallExp, a int) int {
 	}
 
 	return nArgs
+}
+
+func expToOpArg(fi *funcInfo, node Exp, argKinds int) (arg, argKind int) {
+	if argKinds&ARG_CONST > 0 {
+		idx := -1
+		switch x := node.(type) {
+		case *NilExp:
+			idx = fi.indexOfConstant(nil)
+		case *FalseExp:
+			idx = fi.indexOfConstant(false)
+		case *TrueExp:
+			idx = fi.indexOfConstant(true)
+		case *IntegerExp:
+			idx = fi.indexOfConstant(x.Val)
+		case *FloatExp:
+			idx = fi.indexOfConstant(x.Val)
+		case *StringExp:
+			idx = fi.indexOfConstant(x.Str)
+		}
+		if idx >= 0 && idx <= 0xFF {
+			return 0x100 + idx, ARG_CONST
+		}
+	}
+
+	if nameExp, ok := node.(*NameExp); ok {
+		if argKinds&ARG_REG > 0 {
+			if r := fi.slotOfLocVar(nameExp.Name); r >= 0 {
+				return r, ARG_REG
+			}
+		}
+		if argKinds&ARG_UPVAL > 0 {
+			if idx := fi.indexOfUpval(nameExp.Name); idx >= 0 {
+				return idx, ARG_UPVAL
+			}
+		}
+	}
+
+	a := fi.allocReg()
+	cgExp(fi, node, a, 1)
+	return a, ARG_REG
 }

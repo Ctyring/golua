@@ -4,8 +4,7 @@ import (
 	"lua/src/api"
 	"lua/src/binchunk"
 	"lua/src/compiler"
-	"lua/src/util"
-	vm2 "lua/src/vm"
+	. "lua/src/vm"
 )
 
 // 加载二进制chunk，第一个参数是二进制chunk，第二个参数是chunk名字，第三个参数指定加载模式("b" 二进制 "t" 文本 "bt" 二进制或文本)
@@ -16,7 +15,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	} else {
 		proto = compiler.Compile(string(chunk), chunkName) // 编译文本chunk
 	}
-	util.List(proto)
+	//util.List(proto)
 	c := newLuaClosure(proto)
 	self.stack.push(c)
 	// 判断是否需要Upvalue
@@ -33,6 +32,7 @@ func (self *luaState) Call(nArgs, nResults int) {
 	// 根据索引取出函数，判断是否真的是Lua函数
 	val := self.stack.get(-(nArgs + 1))
 	c, ok := val.(*closure)
+
 	if !ok { // 如果被调用值不是函数，就查找并调用元方法
 		if mf := getMetafield(val, "__call", self); mf != nil {
 			if c, ok = mf.(*closure); ok {
@@ -121,10 +121,10 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 // 执行被调函数
 func (self *luaState) runLuaClosure() {
 	for {
-		util.PrintStack(self)
-		inst := vm2.Instruction(self.Fetch())
+		inst := Instruction(self.Fetch())
+		//util.PrintStack(self)
 		inst.Execute(self)
-		if inst.Opcode() == vm2.OP_RETURN {
+		if inst.Opcode() == OP_RETURN {
 			break
 		}
 	}

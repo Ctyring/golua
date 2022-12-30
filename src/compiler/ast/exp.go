@@ -27,8 +27,8 @@ type NameExp struct {
 // 运算符表达式
 type UnopExp struct { // 一元运算符表达式
 	Line int
-	Op  int
-	Exp Exp
+	Op   int
+	Exp  Exp
 }
 
 type BinopExp struct { // 二元运算符表达式
@@ -78,6 +78,6 @@ type FuncCallExp struct { // 函数调用表达式
 	Line      int // `(`所在行号
 	LastLine  int // `)`所在行号
 	PrefixExp Exp
-	NameExp   *NameExp
+	NameExp   *StringExp
 	Args      []Exp
 }
