@@ -1,10 +1,10 @@
 package vm
 
 import (
-	api2 "lua/src/api"
+	. "lua/src/api"
 )
 
-func _binaryArith(i Instruction, vm api2.LuaVM, op api2.ArithOp) {
+func _binaryArith(i Instruction, vm LuaVM, op ArithOp) {
 	a, b, c := i.ABC()
 	a += 1
 	// 压入两个操作数
@@ -16,7 +16,7 @@ func _binaryArith(i Instruction, vm api2.LuaVM, op api2.ArithOp) {
 	vm.Replace(a)
 }
 
-func _unaryArith(i Instruction, vm api2.LuaVM, op api2.ArithOp) {
+func _unaryArith(i Instruction, vm LuaVM, op ArithOp) {
 	a, b, _ := i.ABC()
 	a += 1
 	b += 1
@@ -28,22 +28,22 @@ func _unaryArith(i Instruction, vm api2.LuaVM, op api2.ArithOp) {
 	vm.Replace(a)
 }
 
-func add(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPADD) }
-func sub(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPSUB) }
-func mul(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPMUL) }
-func mod(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPMOD) }
-func pow(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPPOW) }
-func div(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPDIV) }
-func idiv(i Instruction, vm api2.LuaVM) { _binaryArith(i, vm, api2.LUA_OPIDIV) }
-func band(i Instruction, vm api2.LuaVM) { _binaryArith(i, vm, api2.LUA_OPBAND) }
-func bor(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPBOR) }
-func bxor(i Instruction, vm api2.LuaVM) { _binaryArith(i, vm, api2.LUA_OPBXOR) }
-func shl(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPSHL) }
-func shr(i Instruction, vm api2.LuaVM)  { _binaryArith(i, vm, api2.LUA_OPSHR) }
-func unm(i Instruction, vm api2.LuaVM)  { _unaryArith(i, vm, api2.LUA_OPUNM) }
-func bnot(i Instruction, vm api2.LuaVM) { _unaryArith(i, vm, api2.LUA_OPBNOT) }
+func add(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPADD) }
+func sub(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPSUB) }
+func mul(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPMUL) }
+func mod(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPMOD) }
+func pow(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPPOW) }
+func div(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPDIV) }
+func idiv(i Instruction, vm LuaVM) { _binaryArith(i, vm, LUA_OPIDIV) }
+func band(i Instruction, vm LuaVM) { _binaryArith(i, vm, LUA_OPBAND) }
+func bor(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPBOR) }
+func bxor(i Instruction, vm LuaVM) { _binaryArith(i, vm, LUA_OPBXOR) }
+func shl(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPSHL) }
+func shr(i Instruction, vm LuaVM)  { _binaryArith(i, vm, LUA_OPSHR) }
+func unm(i Instruction, vm LuaVM)  { _unaryArith(i, vm, LUA_OPUNM) }
+func bnot(i Instruction, vm LuaVM) { _unaryArith(i, vm, LUA_OPBNOT) }
 
-func length(i Instruction, vm api2.LuaVM) {
+func length(i Instruction, vm LuaVM) {
 	a, b, _ := i.ABC()
 	a += 1
 	b += 1
@@ -51,7 +51,7 @@ func length(i Instruction, vm api2.LuaVM) {
 	vm.Replace(a)
 }
 
-func concat(i Instruction, vm api2.LuaVM) {
+func concat(i Instruction, vm LuaVM) {
 	a, b, c := i.ABC()
 	a += 1
 	b += 1
@@ -65,7 +65,7 @@ func concat(i Instruction, vm api2.LuaVM) {
 	vm.Replace(a)
 }
 
-func _compare(i Instruction, vm api2.LuaVM, op api2.CompareOp) {
+func _compare(i Instruction, vm LuaVM, op CompareOp) {
 	a, b, c := i.ABC()
 	vm.GetRK(b)
 	vm.GetRK(c)
@@ -75,11 +75,11 @@ func _compare(i Instruction, vm api2.LuaVM, op api2.CompareOp) {
 	vm.Pop(2)
 }
 
-func eq(i Instruction, vm api2.LuaVM) { _compare(i, vm, api2.LUA_OPEQ) }
-func lt(i Instruction, vm api2.LuaVM) { _compare(i, vm, api2.LUA_OPLT) }
-func le(i Instruction, vm api2.LuaVM) { _compare(i, vm, api2.LUA_OPLE) }
+func eq(i Instruction, vm LuaVM) { _compare(i, vm, LUA_OPEQ) }
+func lt(i Instruction, vm LuaVM) { _compare(i, vm, LUA_OPLT) }
+func le(i Instruction, vm LuaVM) { _compare(i, vm, LUA_OPLE) }
 
-func not(i Instruction, vm api2.LuaVM) {
+func not(i Instruction, vm LuaVM) {
 	a, b, _ := i.ABC()
 	a += 1
 	b += 1
@@ -87,7 +87,7 @@ func not(i Instruction, vm api2.LuaVM) {
 	vm.Replace(a)
 }
 
-func testSet(i Instruction, vm api2.LuaVM) {
+func testSet(i Instruction, vm LuaVM) {
 	a, b, c := i.ABC()
 	a += 1
 	b += 1
@@ -100,7 +100,7 @@ func testSet(i Instruction, vm api2.LuaVM) {
 }
 
 // test 是 testset 的一种特殊情况， 即 a = b
-func test(i Instruction, vm api2.LuaVM) {
+func test(i Instruction, vm LuaVM) {
 	a, _, c := i.ABC()
 	a += 1
 

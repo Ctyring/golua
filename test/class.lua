@@ -15,3 +15,51 @@ Account = require("object")
 a = Account:new{balance = 0}
 a:deposit(100.00)
 print(a.balance)
+-- 继承
+SpecialAccount = Account:new({})
+s = SpecialAccount:new{limit = 1000.00}
+s:deposit(100.00)
+print(s.balance)
+-- 多重继承
+local function search(k, plist)
+    print(k)
+    for i = 1, #plist do
+        local v = plist[i][k]
+        if v then
+            return v
+        end
+    end
+end
+
+function createClass(...)
+    local c = {}
+    local parents = {...}
+    setmetatable(c, {__index = function(t, k)
+        -- 改进
+        local v = search(k, parents)
+        t[k] = v -- 保存这个方法，下次就不用搜了
+        return v
+    end})
+    c.__index = c
+    function c:new(o)
+        o = o or {}
+        setmetatable(o, c)
+        return o
+    end
+    return c
+end
+-- 用例
+Named = {}
+function Named:getname()
+    return self.name
+end
+function Named:setname(n)
+    self.name = n
+end
+NamedAccount = createClass(Account, Named)
+n = NamedAccount:new{name = "Paul"}
+print(n:getname())
+-- 找到getname的思路：先找n，n里面没有这个方法，然后找n的元表，就是NamedAccount
+-- 找不到，继续搜元表，就是上面的一个搜索方法，在这个方法里面会遍历Account和Named
+-- 所以这种方法的性能有限。
+-- 一种改进是将被继承的方法复制到子类中。
