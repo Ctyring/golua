@@ -45,12 +45,14 @@ func getConstants(fi *funcInfo) []interface{} {
 
 func getUpvalues(fi *funcInfo) []Upvalue {
 	upvals := make([]Upvalue, len(fi.upvalues))
+	i := 0
 	for _, uv := range fi.upvalues {
 		if uv.locVarSlot >= 0 { // instack
-			upvals[uv.index] = Upvalue{1, byte(uv.locVarSlot)}
+			upvals[uv.index] = Upvalue{fi.upvalNames[i], 1, byte(uv.locVarSlot)}
 		} else {
-			upvals[uv.index] = Upvalue{0, byte(uv.upvalIndex)}
+			upvals[uv.index] = Upvalue{fi.upvalNames[i], 0, byte(uv.upvalIndex)}
 		}
+		i++
 	}
 	return upvals
 }

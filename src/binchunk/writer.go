@@ -37,7 +37,6 @@ func (self *writer) writeProto(proto *Prototype) {
 	self.writeProtos(proto.Protos)
 	self.writeLineInfo(proto.LineInfo)
 	self.writeLocVars(proto.LocVars)
-	self.writeUpvalueNames(proto.UpvalueNames)
 }
 
 func (self *writer) writeByte(b byte) {
@@ -109,6 +108,7 @@ func (self *writer) writeConstants(constants []interface{}) {
 func (self *writer) writeUpvalues(upvalues []Upvalue) {
 	self.writeUint32(uint32(len(upvalues)))
 	for _, u := range upvalues {
+		self.writeString(u.Name)
 		self.writeByte(u.Instack)
 		self.writeByte(u.Idx)
 	}
@@ -137,6 +137,7 @@ func (self *writer) writeLocVars(locVars []LocVar) {
 	}
 }
 
+// 暂时废弃
 func (self *writer) writeUpvalueNames(upvalueNames []string) {
 	self.writeUint32(uint32(len(upvalueNames)))
 	for _, name := range upvalueNames {

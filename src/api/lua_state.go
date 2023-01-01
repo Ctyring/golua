@@ -87,13 +87,14 @@ type BasicAPI interface {
 	Resume(from LuaState, nArgs int) int           // 恢复一个协程
 	Yield(nResults int) int                        // 挂起一个协程
 	Status() int                                   // 获取协程的状态
-
-	IsYieldable() bool          // 判断当前协程是否可以挂起
-	ToThread(idx int) LuaState  // 将指定索引处的值转换成协程
-	PushThread() bool           // 将当前协程压入栈顶
-	XMove(to LuaState, n int)   // 用于在两个协程栈之间移动元素
-	GetStack() bool             // 获取栈帧
-	ToProto(idx int) *Prototype // 将指定索引处的值转换成原型
+	IsYieldable() bool                             // 判断当前协程是否可以挂起
+	ToThread(idx int) LuaState                     // 将指定索引处的值转换成协程
+	PushThread() bool                              // 将当前协程压入栈顶
+	XMove(to LuaState, n int)                      // 用于在两个协程栈之间移动元素
+	GetStack() bool                                // 获取栈帧
+	ToProto(idx int) *Prototype                    // 将指定索引处的值转换成原型
+	SetUpvalue(idx, n int)                         // 设置指定索引处的闭包的指定upvalue的值
+	GetUpvalue(idx, n int)                         // 获取指定索引处的闭包的指定upvalue的值
 }
 
 type LuaState interface {

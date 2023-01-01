@@ -56,7 +56,6 @@ func (self *reader) readProto(parentSource string) *Prototype {
 		Protos:          self.readProtos(source),
 		LineInfo:        self.readLineInfo(),
 		LocVars:         self.readLocVars(),
-		UpvalueNames:    self.readUpvalueNames(),
 	}
 }
 
@@ -160,6 +159,7 @@ func (self *reader) readUpvalues() []Upvalue {
 	upvalues := make([]Upvalue, size)
 	for i := range upvalues {
 		upvalues[i] = Upvalue{
+			Name:    self.readString(),
 			Instack: self.readByte(),
 			Idx:     self.readByte(),
 		}

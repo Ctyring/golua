@@ -1,29 +1,29 @@
 package state
 
 import (
-	"lua/src/api"
-	"lua/src/binchunk"
-	"lua/src/compiler"
+	. "lua/src/api"
+	. "lua/src/binchunk"
+	. "lua/src/compiler"
 	. "lua/src/vm"
 )
 
 // 加载二进制chunk，第一个参数是二进制chunk，第二个参数是chunk名字，第三个参数指定加载模式("b" 二进制 "t" 文本 "bt" 二进制或文本)
 func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
-	var proto *binchunk.Prototype
-	if binchunk.IsBinaryChunk(chunk) { // 如果是二进制chunk
-		proto = binchunk.Undump(chunk) // 解析二进制chunk
+	var proto *Prototype
+	if IsBinaryChunk(chunk) { // 如果是二进制chunk
+		proto = Undump(chunk) // 解析二进制chunk
 	} else {
-		proto = compiler.Compile(string(chunk), chunkName) // 编译文本chunk
+		proto = Compile(string(chunk), chunkName) // 编译文本chunk
 	}
 	//util.List(proto)
 	c := newLuaClosure(proto)
 	self.stack.push(c)
 	// 判断是否需要Upvalue
 	if len(proto.Upvalues) > 0 {
-		env := self.registry.get(api.LUA_RIDX_GLOBALS) // 获取全局环境表
-		c.upvals[0] = &upvalue{&env}                   // 把全局环境表作为第一个Upvalue
+		env := self.registry.get(LUA_RIDX_GLOBALS) // 获取全局环境表
+		c.upvals[0] = &upvalue{&env}               // 把全局环境表作为第一个Upvalue
 	}
-	return api.LUA_OK
+	return LUA_OK
 }
 
 // 调用Lua函数
@@ -62,7 +62,7 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 	isVararg := c.proto.IsVararg == 1
 
 	// 创建Lua栈帧
-	newStack := newLuaStack(nRegs+api.LUA_MINSTACK, self)
+	newStack := newLuaStack(nRegs+LUA_MINSTACK, self)
 	// 把闭包和调用帧联系起来
 	newStack.closure = c
 
@@ -92,7 +92,7 @@ func (self *luaState) callLuaClosure(nArgs, nResults int, c *closure) {
 // 调用Go函数
 func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 	// 创建Lua栈帧
-	newStack := newLuaStack(nArgs+api.LUA_MINSTACK, self)
+	newStack := newLuaStack(nArgs+LUA_MINSTACK, self)
 	// 把闭包和调用帧联系起来
 	newStack.closure = c
 
@@ -157,7 +157,7 @@ func (self *luaStack) pushN(vals []luaValue, n int) {
 // 执行代码
 func (self *luaState) PCall(nArgs, nResults, msgh int) (status int) {
 	caller := self.stack
-	status = api.LUA_ERRRUN
+	status = LUA_ERRRUN
 
 	// 定义一个匿名函数延时执行，用来做错误处理
 	defer func() {
@@ -173,6 +173,6 @@ func (self *luaState) PCall(nArgs, nResults, msgh int) (status int) {
 	}()
 
 	self.Call(nArgs, nResults)
-	status = api.LUA_OK
+	status = LUA_OK
 	return
 }

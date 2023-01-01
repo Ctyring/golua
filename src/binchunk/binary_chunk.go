@@ -47,7 +47,7 @@ type Prototype struct {
 	MaxStackSize    byte          // 寄存器数量
 	Code            []uint32      // 指令表，每条指令占四个字节
 	Constants       []interface{} // 常量表，用于存放Lua代码里出现的字面量，每个常量都以1字节tag开头，表示常量类型
-	Upvalues        []Upvalue     // upvalue表，每个元素占用两个字节
+	Upvalues        []Upvalue     // upvalue表，每个元素占用三个字节
 	Protos          []*Prototype  // 子函数原型表
 	LineInfo        []uint32      // 行号表，行号表和指令表一一对应，记录了每条指令对应的源代码行号
 	LocVars         []LocVar      // 局部变量表
@@ -65,8 +65,9 @@ const (
 )
 
 type Upvalue struct {
-	Instack byte // 是否在寄存器(栈)中
-	Idx     byte // 寄存器索引或upvalue索引
+	Name    string // upvalue名
+	Instack byte   // 是否在寄存器(栈)中
+	Idx     byte   // 寄存器索引或upvalue索引
 }
 
 type LocVar struct {

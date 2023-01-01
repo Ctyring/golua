@@ -89,3 +89,15 @@ func (self *luaState) GetMetatable(idx int) bool {
 	}
 	return false
 }
+
+func (self *luaState) GetUpvalue(idx, n int) {
+	c := self.stack.get(idx).(*closure)
+	if c != nil {
+		uvInfo := c.proto.Upvalues[n-1]
+		if uvInfo.Instack == 1 {
+			self.stack.push(c.upvals[uvInfo.Idx].val)
+		} else {
+			self.stack.push(c.upvals[uvInfo.Idx])
+		}
+	}
+}

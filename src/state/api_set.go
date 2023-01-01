@@ -1,7 +1,7 @@
 package state
 
 import (
-	api2 "lua/src/api"
+	. "lua/src/api"
 )
 
 // 把键值写入表，键和值都从栈顶弹出
@@ -66,13 +66,13 @@ func (self *luaState) RawSetI(idx int, i int64) {
 
 // 向全局变量写入一个值
 func (self *luaState) SetGlobal(name string) {
-	t := self.registry.get(api2.LUA_RIDX_GLOBALS)
+	t := self.registry.get(LUA_RIDX_GLOBALS)
 	v := self.stack.pop()
 	self.setTable(t, name, v, false)
 }
 
 // 给全局环境注册Go函数值
-func (self *luaState) Register(name string, f api2.GoFunction) {
+func (self *luaState) Register(name string, f GoFunction) {
 	// 把go函数压入栈
 	self.PushGoFunction(f)
 	// 放入全局环境
@@ -91,5 +91,15 @@ func (self *luaState) SetMetatable(idx int) {
 		setMetatable(val, tbl, self)
 	} else {
 		panic("table expected!")
+	}
+}
+
+func (self *luaState) SetUpvalue(idx int, n int) {
+	fi := self.stack.get(idx)
+	if c, ok := fi.(*closure); ok {
+		val := self.stack.pop()
+		if uv, ok := val.(*upvalue); ok {
+			c.upvals[n-1] = uv
+		}
 	}
 }

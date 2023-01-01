@@ -194,7 +194,8 @@ func baseLoad(ls LuaState) int {
 func loadAux(ls LuaState, status, envIdx int) int {
 	if status == LUA_OK {
 		if envIdx != 0 { /* 'env' parameter? */
-			panic("todo!")
+			ls.PushValue(envIdx) /* environment for loaded function */
+			ls.SetUpvalue(-2, 1) /* set it as 1st upvalue */
 		}
 		return 1
 	} else { /* error (message is on top of the stack) */

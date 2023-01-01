@@ -1,7 +1,7 @@
 package state
 
 import (
-	"lua/src/api"
+	. "lua/src/api"
 )
 
 // lua栈
@@ -58,7 +58,7 @@ func (self *luaStack) pop() luaValue {
 
 // 把索引转换成绝对索引
 func (self *luaStack) absIndex(idx int) int {
-	if idx >= 0 || idx <= api.LUA_REGISTRYINDEX {
+	if idx >= 0 || idx <= LUA_REGISTRYINDEX {
 		return idx
 	}
 	return idx + self.top + 1
@@ -67,13 +67,13 @@ func (self *luaStack) absIndex(idx int) int {
 // 检查索引是否合法
 func (self *luaStack) isValid(idx int) bool {
 	// 判断是否是Upvalue
-	if idx < api.LUA_REGISTRYINDEX {
-		uvIdx := api.LUA_REGISTRYINDEX - idx - 1
+	if idx < LUA_REGISTRYINDEX {
+		uvIdx := LUA_REGISTRYINDEX - idx - 1
 		c := self.closure
 		return c != nil && uvIdx < len(c.upvals)
 	}
 	// 伪索引属于有效索引
-	if idx == api.LUA_REGISTRYINDEX {
+	if idx == LUA_REGISTRYINDEX {
 		return true
 	}
 	absIds := self.absIndex(idx)
@@ -83,15 +83,15 @@ func (self *luaStack) isValid(idx int) bool {
 // 根据索引从栈里取值
 func (self *luaStack) get(idx int) luaValue {
 	// 判断是否是Upvalue
-	if idx < api.LUA_REGISTRYINDEX {
-		uvidx := api.LUA_REGISTRYINDEX - idx - 1
+	if idx < LUA_REGISTRYINDEX {
+		uvidx := LUA_REGISTRYINDEX - idx - 1
 		c := self.closure
 		if c == nil || uvidx >= len(c.upvals) {
 			return nil
 		}
 		return *(c.upvals[uvidx].val)
 	}
-	if idx == api.LUA_REGISTRYINDEX {
+	if idx == LUA_REGISTRYINDEX {
 		return self.state.registry
 	}
 	absIds := self.absIndex(idx)
@@ -104,8 +104,8 @@ func (self *luaStack) get(idx int) luaValue {
 // 根据索引设置栈里的值
 func (self *luaStack) set(idx int, val luaValue) {
 	// 判断是否是Upvalue
-	if idx < api.LUA_REGISTRYINDEX {
-		uvIdx := api.LUA_REGISTRYINDEX - idx - 1
+	if idx < LUA_REGISTRYINDEX {
+		uvIdx := LUA_REGISTRYINDEX - idx - 1
 		c := self.closure
 		if c != nil && uvIdx < len(c.upvals) {
 			*(c.upvals[uvIdx].val) = val
@@ -113,7 +113,7 @@ func (self *luaStack) set(idx int, val luaValue) {
 		return
 	}
 	// 判断是否是注册表
-	if idx == api.LUA_REGISTRYINDEX {
+	if idx == LUA_REGISTRYINDEX {
 		self.state.registry = val.(*luaTable)
 		return
 	}
