@@ -1,13 +1,13 @@
 package parser
 
 import (
-	"lua/src/compiler/ast"
-	"lua/src/compiler/lexer"
+	. "lua/src/compiler/ast"
+	. "lua/src/compiler/lexer"
 	"lua/src/number"
 	"math"
 )
 
-func optimizeLogicalOr(exp *ast.BinopExp) ast.Exp {
+func optimizeLogicalOr(exp *BinopExp) Exp {
 	if isTrue(exp.Exp1) {
 		return exp.Exp1 // true or x => true
 	}
@@ -17,7 +17,7 @@ func optimizeLogicalOr(exp *ast.BinopExp) ast.Exp {
 	return exp
 }
 
-func optimizeLogicalAnd(exp *ast.BinopExp) ast.Exp {
+func optimizeLogicalAnd(exp *BinopExp) Exp {
 	if isFalse(exp.Exp1) {
 		return exp.Exp1 // false and x => false
 	}
@@ -27,43 +27,43 @@ func optimizeLogicalAnd(exp *ast.BinopExp) ast.Exp {
 	return exp
 }
 
-func optimizeBitwiseBinaryOp(exp *ast.BinopExp) ast.Exp {
+func optimizeBitwiseBinaryOp(exp *BinopExp) Exp {
 	if i, ok := castToInt(exp.Exp1); ok {
 		if j, ok := castToInt(exp.Exp2); ok {
 			switch exp.Op {
-			case lexer.TOKEN_OP_BAND:
-				return &ast.IntegerExp{exp.Line, i & j}
-			case lexer.TOKEN_OP_BOR:
-				return &ast.IntegerExp{exp.Line, i | j}
-			case lexer.TOKEN_OP_BXOR:
-				return &ast.IntegerExp{exp.Line, i ^ j}
-			case lexer.TOKEN_OP_SHL:
-				return &ast.IntegerExp{exp.Line, number.ShiftLeft(i, j)}
-			case lexer.TOKEN_OP_SHR:
-				return &ast.IntegerExp{exp.Line, number.ShiftRight(i, j)}
+			case TOKEN_OP_BAND:
+				return &IntegerExp{exp.Line, i & j}
+			case TOKEN_OP_BOR:
+				return &IntegerExp{exp.Line, i | j}
+			case TOKEN_OP_BXOR:
+				return &IntegerExp{exp.Line, i ^ j}
+			case TOKEN_OP_SHL:
+				return &IntegerExp{exp.Line, number.ShiftLeft(i, j)}
+			case TOKEN_OP_SHR:
+				return &IntegerExp{exp.Line, number.ShiftRight(i, j)}
 			}
 		}
 	}
 	return exp
 }
 
-func optimizeArithBinaryOp(exp *ast.BinopExp) ast.Exp {
-	if x, ok := exp.Exp1.(*ast.IntegerExp); ok {
-		if y, ok := exp.Exp2.(*ast.IntegerExp); ok {
+func optimizeArithBinaryOp(exp *BinopExp) Exp {
+	if x, ok := exp.Exp1.(*IntegerExp); ok {
+		if y, ok := exp.Exp2.(*IntegerExp); ok {
 			switch exp.Op {
-			case lexer.TOKEN_OP_ADD:
-				return &ast.IntegerExp{exp.Line, x.Val + y.Val}
-			case lexer.TOKEN_OP_SUB:
-				return &ast.IntegerExp{exp.Line, x.Val - y.Val}
-			case lexer.TOKEN_OP_MUL:
-				return &ast.IntegerExp{exp.Line, x.Val * y.Val}
-			case lexer.TOKEN_OP_IDIV:
+			case TOKEN_OP_ADD:
+				return &IntegerExp{exp.Line, x.Val + y.Val}
+			case TOKEN_OP_SUB:
+				return &IntegerExp{exp.Line, x.Val - y.Val}
+			case TOKEN_OP_MUL:
+				return &IntegerExp{exp.Line, x.Val * y.Val}
+			case TOKEN_OP_IDIV:
 				if y.Val != 0 {
-					return &ast.IntegerExp{exp.Line, number.IFloorDiv(x.Val, y.Val)}
+					return &IntegerExp{exp.Line, number.IFloorDiv(x.Val, y.Val)}
 				}
-			case lexer.TOKEN_OP_MOD:
+			case TOKEN_OP_MOD:
 				if y.Val != 0 {
-					return &ast.IntegerExp{exp.Line, number.IMod(x.Val, y.Val)}
+					return &IntegerExp{exp.Line, number.IMod(x.Val, y.Val)}
 				}
 			}
 		}
@@ -71,35 +71,35 @@ func optimizeArithBinaryOp(exp *ast.BinopExp) ast.Exp {
 	if f, ok := castToFloat(exp.Exp1); ok {
 		if g, ok := castToFloat(exp.Exp2); ok {
 			switch exp.Op {
-			case lexer.TOKEN_OP_ADD:
-				return &ast.FloatExp{exp.Line, f + g}
-			case lexer.TOKEN_OP_SUB:
-				return &ast.FloatExp{exp.Line, f - g}
-			case lexer.TOKEN_OP_MUL:
-				return &ast.FloatExp{exp.Line, f * g}
-			case lexer.TOKEN_OP_DIV:
+			case TOKEN_OP_ADD:
+				return &FloatExp{exp.Line, f + g}
+			case TOKEN_OP_SUB:
+				return &FloatExp{exp.Line, f - g}
+			case TOKEN_OP_MUL:
+				return &FloatExp{exp.Line, f * g}
+			case TOKEN_OP_DIV:
 				if g != 0 {
-					return &ast.FloatExp{exp.Line, f / g}
+					return &FloatExp{exp.Line, f / g}
 				}
-			case lexer.TOKEN_OP_IDIV:
+			case TOKEN_OP_IDIV:
 				if g != 0 {
-					return &ast.FloatExp{exp.Line, number.FFloorDiv(f, g)}
+					return &FloatExp{exp.Line, number.FFloorDiv(f, g)}
 				}
-			case lexer.TOKEN_OP_MOD:
+			case TOKEN_OP_MOD:
 				if g != 0 {
-					return &ast.FloatExp{exp.Line, number.FMod(f, g)}
+					return &FloatExp{exp.Line, number.FMod(f, g)}
 				}
-			case lexer.TOKEN_OP_POW:
-				return &ast.FloatExp{exp.Line, math.Pow(f, g)}
+			case TOKEN_OP_POW:
+				return &FloatExp{exp.Line, math.Pow(f, g)}
 			}
 		}
 	}
 	return exp
 }
 
-func optimizePow(exp ast.Exp) ast.Exp {
-	if binop, ok := exp.(*ast.BinopExp); ok {
-		if binop.Op == lexer.TOKEN_OP_POW {
+func optimizePow(exp Exp) Exp {
+	if binop, ok := exp.(*BinopExp); ok {
+		if binop.Op == TOKEN_OP_POW {
 			binop.Exp2 = optimizePow(binop.Exp2)
 		}
 		return optimizeArithBinaryOp(binop)
@@ -107,25 +107,25 @@ func optimizePow(exp ast.Exp) ast.Exp {
 	return exp
 }
 
-func optimizeUnaryOp(exp *ast.UnopExp) ast.Exp {
+func optimizeUnaryOp(exp *UnopExp) Exp {
 	switch exp.Op {
-	case lexer.TOKEN_OP_UNM:
+	case TOKEN_OP_UNM:
 		return optimizeUnm(exp)
-	case lexer.TOKEN_OP_NOT:
+	case TOKEN_OP_NOT:
 		return optimizeNot(exp)
-	case lexer.TOKEN_OP_BNOT:
+	case TOKEN_OP_BNOT:
 		return optimizeBnot(exp)
 	default:
 		return exp
 	}
 }
 
-func optimizeUnm(exp *ast.UnopExp) ast.Exp {
+func optimizeUnm(exp *UnopExp) Exp {
 	switch x := exp.Exp.(type) { // number?
-	case *ast.IntegerExp:
+	case *IntegerExp:
 		x.Val = -x.Val
 		return x
-	case *ast.FloatExp:
+	case *FloatExp:
 		if x.Val != 0 {
 			x.Val = -x.Val
 			return x
@@ -134,42 +134,42 @@ func optimizeUnm(exp *ast.UnopExp) ast.Exp {
 	return exp
 }
 
-func optimizeNot(exp *ast.UnopExp) ast.Exp {
+func optimizeNot(exp *UnopExp) Exp {
 	switch exp.Exp.(type) {
-	case *ast.NilExp, *ast.FalseExp: // false
-		return &ast.TrueExp{exp.Line}
-	case *ast.TrueExp, *ast.IntegerExp, *ast.FloatExp, *ast.StringExp: // true
-		return &ast.FalseExp{exp.Line}
+	case *NilExp, *FalseExp: // false
+		return &TrueExp{exp.Line}
+	case *TrueExp, *IntegerExp, *FloatExp, *StringExp: // true
+		return &FalseExp{exp.Line}
 	default:
 		return exp
 	}
 }
 
-func optimizeBnot(exp *ast.UnopExp) ast.Exp {
+func optimizeBnot(exp *UnopExp) Exp {
 	switch x := exp.Exp.(type) { // number?
-	case *ast.IntegerExp:
+	case *IntegerExp:
 		x.Val = ^x.Val
 		return x
-	case *ast.FloatExp:
+	case *FloatExp:
 		if i, ok := number.FloatToInteger(x.Val); ok {
-			return &ast.IntegerExp{x.Line, ^i}
+			return &IntegerExp{x.Line, ^i}
 		}
 	}
 	return exp
 }
 
-func isFalse(exp ast.Exp) bool {
+func isFalse(exp Exp) bool {
 	switch exp.(type) {
-	case *ast.FalseExp, *ast.NilExp:
+	case *FalseExp, *NilExp:
 		return true
 	default:
 		return false
 	}
 }
 
-func isTrue(exp ast.Exp) bool {
+func isTrue(exp Exp) bool {
 	switch exp.(type) {
-	case *ast.TrueExp, *ast.IntegerExp, *ast.FloatExp, *ast.StringExp:
+	case *TrueExp, *IntegerExp, *FloatExp, *StringExp:
 		return true
 	default:
 		return false
@@ -177,30 +177,30 @@ func isTrue(exp ast.Exp) bool {
 }
 
 // todo
-func isVarargOrFuncCall(exp ast.Exp) bool {
+func isVarargOrFuncCall(exp Exp) bool {
 	switch exp.(type) {
-	case *ast.VarargExp, *ast.FuncCallExp:
+	case *VarargExp, *FuncCallExp:
 		return true
 	}
 	return false
 }
 
-func castToInt(exp ast.Exp) (int64, bool) {
+func castToInt(exp Exp) (int64, bool) {
 	switch x := exp.(type) {
-	case *ast.IntegerExp:
+	case *IntegerExp:
 		return x.Val, true
-	case *ast.FloatExp:
+	case *FloatExp:
 		return number.FloatToInteger(x.Val)
 	default:
 		return 0, false
 	}
 }
 
-func castToFloat(exp ast.Exp) (float64, bool) {
+func castToFloat(exp Exp) (float64, bool) {
 	switch x := exp.(type) {
-	case *ast.IntegerExp:
+	case *IntegerExp:
 		return float64(x.Val), true
-	case *ast.FloatExp:
+	case *FloatExp:
 		return x.Val, true
 	default:
 		return 0, false

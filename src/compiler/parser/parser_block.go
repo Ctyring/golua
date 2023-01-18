@@ -8,9 +8,9 @@ import (
 // 创建Block结构体实例
 func parseBlock(l *Lexer) *Block {
 	return &Block{
-		Stats:    parseStats(l),
-		RetExps:  parseRetExps(l),
-		LastLine: l.Line(),
+		Stats:    parseStats(l),   // 解析语句序列
+		RetExps:  parseRetExps(l), // 解析返回值
+		LastLine: l.Line(),        // 获取结束行
 	}
 }
 

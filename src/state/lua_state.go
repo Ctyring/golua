@@ -17,7 +17,7 @@ func New() LuaState {
 	ls := &luaState{}
 
 	registry := newLuaTable(8, 0)
-	registry.put(LUA_RIDX_MAINTHREAD, ls)
+	registry.put(LUA_RIDX_MAINTHREAD, ls)              // 创建主线程
 	registry.put(LUA_RIDX_GLOBALS, newLuaTable(0, 20)) // 全局环境
 
 	ls.registry = registry

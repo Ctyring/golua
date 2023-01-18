@@ -1,10 +1,10 @@
 package codegen
 
 import (
-	ast2 "lua/src/compiler/ast"
+	. "lua/src/compiler/ast"
 )
 
-func cgBlock(fi *funcInfo, node *ast2.Block) {
+func cgBlock(fi *funcInfo, node *Block) {
 	for _, stat := range node.Stats { // 遍历语句序列
 		cgStat(fi, stat) // 生成语句
 	}
@@ -15,7 +15,7 @@ func cgBlock(fi *funcInfo, node *ast2.Block) {
 }
 
 // 处理并生成返回指令
-func cgRetStat(fi *funcInfo, exps []ast2.Exp) {
+func cgRetStat(fi *funcInfo, exps []Exp) {
 	nExps := len(exps)
 	if nExps == 0 { // 如果没有返回值
 		fi.emitReturn(0, 0) // 生成返回指令
@@ -23,13 +23,13 @@ func cgRetStat(fi *funcInfo, exps []ast2.Exp) {
 	}
 
 	if nExps == 1 { // 如果只有一个返回值
-		if nameExp, ok := exps[0].(*ast2.NameExp); ok { // 如果是变量
+		if nameExp, ok := exps[0].(*NameExp); ok { // 如果是变量
 			if r := fi.slotOfLocVar(nameExp.Name); r >= 0 {
 				fi.emitReturn(r, 1)
 				return
 			}
 		}
-		if fcExp, ok := exps[0].(*ast2.FuncCallExp); ok { // 如果是函数调用
+		if fcExp, ok := exps[0].(*FuncCallExp); ok { // 如果是函数调用
 			r := fi.allocReg()
 			cgTailCallExp(fi, fcExp, r) // 生成尾调用指令
 			fi.freeReg()

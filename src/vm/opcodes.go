@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"lua/src/api"
+	. "lua/src/api"
 )
 
 // 定义指令编码格式
@@ -79,7 +79,7 @@ type opcode struct {
 	argCMode byte // 操作数C的使用类型
 	opMode   byte // 指令的模式
 	name     string
-	action   func(i Instruction, vm api.LuaVM)
+	action   func(i Instruction, vm LuaVM)
 }
 
 // 完整指令表
