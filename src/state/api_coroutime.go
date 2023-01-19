@@ -4,7 +4,7 @@ import (
 	. "lua/src/api"
 )
 
-// 创建一个新的线程，把它推入栈顶，同时作为返回值返回
+// 创建一个新的线程，将一个新的调用帧压入栈，同时将线程作为返回值返回
 func (self *luaState) NewThread() LuaState {
 	t := &luaState{
 		registry: self.registry,
@@ -60,8 +60,9 @@ func (self *luaState) GetStack() bool {
 	return self.stack.prev != nil
 }
 
+// 判断协程是否可以挂起
 func (self *luaState) IsYieldable() bool {
-	if self.isMainThread() {
+	if self.isMainThread() { // 只有主协程不能挂起
 		return false
 	}
 	return self.coStatus != LUA_YIELD // todo

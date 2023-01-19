@@ -2,7 +2,7 @@ package state
 
 import (
 	"fmt"
-	api2 "lua/src/api"
+	. "lua/src/api"
 )
 
 func (self *luaState) PushNil() {
@@ -30,18 +30,18 @@ func (self *luaState) PushFString(fmtStr string, a ...interface{}) {
 	self.stack.push(str)
 }
 
-func (self *luaState) PushGoFunction(f api2.GoFunction) {
+func (self *luaState) PushGoFunction(f GoFunction) {
 	self.stack.push(newGoClosure(f, 0))
 }
 
 // 把全局环境压入栈中
 func (self *luaState) PushGlobalTable() {
-	global := self.registry.get(api2.LUA_RIDX_GLOBALS)
+	global := self.registry.get(LUA_RIDX_GLOBALS)
 	self.stack.push(global)
 }
 
 // 把go闭包压入栈中
-func (self *luaState) PushGoClosure(f api2.GoFunction, n int) {
+func (self *luaState) PushGoClosure(f GoFunction, n int) {
 	// 创建Go闭包
 	closure := newGoClosure(f, n)
 	for i := n; i > 0; i-- {
