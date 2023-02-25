@@ -3,7 +3,7 @@ package state
 import (
 	"fmt"
 	. "lua/src/api"
-	stdlib2 "lua/src/stdlib"
+	. "lua/src/stdlib"
 	"os"
 )
 
@@ -237,14 +237,14 @@ func (self *luaState) CallMeta(obj int, event string) bool {
 func (self *luaState) OpenLibs() {
 	// 声明要开启的标准库
 	libs := map[string]GoFunction{
-		"_G":        stdlib2.OpenBaseLib,
-		"math":      stdlib2.OpenMathLib,
-		"table":     stdlib2.OpenTableLib,
-		"string":    stdlib2.OpenStringLib,
-		"utf8":      stdlib2.OpenUTF8Lib,
-		"os":        stdlib2.OpenOSLib,
-		"package":   stdlib2.OpenPackageLib,
-		"coroutine": stdlib2.OpenCoroutineLib,
+		"_G":        OpenBaseLib,
+		"math":      OpenMathLib,
+		"table":     OpenTableLib,
+		"string":    OpenStringLib,
+		"utf8":      OpenUTF8Lib,
+		"os":        OpenOSLib,
+		"package":   OpenPackageLib,
+		"coroutine": OpenCoroutineLib,
 	}
 
 	// 循环调用各个标准库的开启函数

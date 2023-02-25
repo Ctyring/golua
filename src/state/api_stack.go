@@ -33,7 +33,7 @@ func (self *luaState) Copy(fromIdx, toIdx int) {
 	self.stack.set(toIdx, val)
 }
 
-// 把指定索引处的值移动到栈顶
+// 把指定索引处的值压入到栈顶
 func (self *luaState) PushValue(idx int) {
 	val := self.stack.get(idx)
 	self.stack.push(val)
