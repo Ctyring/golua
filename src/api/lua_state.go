@@ -72,6 +72,8 @@ type BasicAPI interface {
 	PushGoClosure(f GoFunction, n int)             // 将Go闭包压入栈顶
 	GetMetatable(idx int) bool                     // 获取指定索引处的值的元表
 	SetMetatable(idx int)                          // 设置指定索引处的值的元表
+	NewMetatable(tname string)                     // 创建一个新的元表
+	GetMetatableFromRegistry(tname string)         // 从注册表中获取指定名称的元表
 	RawLen(idx int) uint                           // 获取指定索引处的值的长度
 	RawEqual(idx1, idx2 int) bool                  // 比较栈中的两个值
 	RawGet(idx int) LuaType                        // 获取指定索引处的表中指定键的值
@@ -95,6 +97,8 @@ type BasicAPI interface {
 	ToProto(idx int) *Prototype                    // 将指定索引处的值转换成原型
 	SetUpvalue(idx, n int)                         // 设置指定索引处的闭包的指定upvalue的值
 	GetUpvalue(idx, n int)                         // 获取指定索引处的闭包的指定upvalue的值
+	NewUserdata(data interface{})                  // 创建一个新的userdata并将其压入栈顶
+	ToUserdata(idx int) *interface{}               // 将指定索引处的值转换成userdata
 }
 
 type LuaState interface {

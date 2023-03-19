@@ -245,6 +245,7 @@ func (self *luaState) OpenLibs() {
 		"os":        OpenOSLib,
 		"package":   OpenPackageLib,
 		"coroutine": OpenCoroutineLib,
+		"boolarray": OpenBoolArrayLib,
 	}
 
 	// 循环调用各个标准库的开启函数

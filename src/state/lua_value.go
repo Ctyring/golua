@@ -26,6 +26,8 @@ func typeOf(val luaValue) LuaType {
 		return LUA_TFUNCTION
 	case *luaState:
 		return LUA_TTHREAD
+	case *userdata:
+		return LUA_TUSERDATA
 	default:
 		panic("todo!")
 	}
@@ -64,6 +66,10 @@ func setMetatable(val luaValue, mt *luaTable, ls *luaState) {
 		t.metatable = mt
 		return
 	}
+	if t, ok := val.(*userdata); ok {
+		t.metatable = mt
+		return
+	}
 	// 否则把元表存储到注册表
 	key := fmt.Sprintf("_MT%d", typeOf(val))
 	ls.registry.put(key, mt)
@@ -73,6 +79,9 @@ func setMetatable(val luaValue, mt *luaTable, ls *luaState) {
 func getMetatable(val luaValue, ls *luaState) *luaTable {
 	// 如果是表，直接返回其元表字段
 	if t, ok := val.(*luaTable); ok {
+		return t.metatable
+	}
+	if t, ok := val.(*userdata); ok {
 		return t.metatable
 	}
 	// 否则从注册表中取出元表，还要判断是否存在

@@ -124,7 +124,7 @@ func cgIfStat(fi *funcInfo, node *IfStat) {
 
 // 生成数值for语句
 func cgForNumStat(fi *funcInfo, node *ForNumStat) {
-	fi.enterScope(true)                       // 进入循环块
+	fi.enterScope(true) // 进入循环块
 	cgLocalVarDeclStat(fi, &LocalVarDeclStat{ // 生成局部变量声明语句。三个特殊的局部变量分别是循环变量、循环变量的初始值、循环变量的终止值
 		NameList: []string{"(for index)", "for limit", "for step"},
 		ExpList:  []Exp{node.InitExp, node.LimitExp, node.StepExp},

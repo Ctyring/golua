@@ -205,7 +205,14 @@ func (self *luaState) ToProto(idx int) *binchunk.Prototype {
 	val := self.stack.get(idx)
 	if c, ok := val.(*closure); ok {
 		return c.proto
+	}
+	return nil
+}
 
+func (self *luaState) ToUserdata(idx int) *interface{} {
+	val := self.stack.get(idx)
+	if udata, ok := val.(*userdata); ok {
+		return &udata.val
 	}
 	return nil
 }

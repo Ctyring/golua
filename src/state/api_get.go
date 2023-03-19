@@ -32,6 +32,28 @@ func (self *luaState) getTable(t, k luaValue, raw bool) LuaType {
 			return typeOf(v)
 		}
 	}
+	// 处理userdata
+	if ud, ok := t.(*userdata); ok {
+		tbl := ud.metatable
+		v := tbl.get(k)
+		if v == nil {
+			if v = tbl.get("__index"); v != nil {
+				switch x := v.(type) {
+				case *luaTable:
+					return self.getTable(x, k, raw)
+				case *closure:
+					self.stack.push(v)
+					self.stack.push(t)
+					self.stack.push(k)
+					self.Call(2, 1)
+					v := self.stack.get(-1)
+					return typeOf(v)
+				}
+			}
+		}
+		self.stack.push(v)
+		return typeOf(v)
+	}
 	if !raw {
 		if mf := getMetafield(t, "__index", self); mf != nil {
 			switch x := mf.(type) {
@@ -100,4 +122,8 @@ func (self *luaState) GetUpvalue(idx, n int) {
 			self.stack.push(c.upvals[uvInfo.Idx])
 		}
 	}
+}
+
+func (self *luaState) GetMetatableFromRegistry(name string) {
+	self.stack.push(self.registry.get(name))
 }

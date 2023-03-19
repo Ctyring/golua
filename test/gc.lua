@@ -90,7 +90,7 @@ do
         setmetatable({}, getmetatable(o))
     end}
     setmetatable({}, mt)
-end
+end 
 collectgarbage()
 collectgarbage()
 collectgarbage()

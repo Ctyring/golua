@@ -20,12 +20,36 @@ func (self *luaState) setTable(t, k, v luaValue, raw bool) {
 			return
 		}
 	}
+	// 处理userdata
+	if ud, ok := t.(*userdata); ok {
+		tbl := ud.metatable
+		val := tbl.get(k)
+		if val == nil {
+			if val = tbl.get("__newindex"); val != nil {
+				switch x := val.(type) {
+				case *luaTable: // 如果元方法是表，把k和v写入表
+					self.setTable(x, k, v, false)
+				case *closure: // 如果元方法是函数，调用函数
+					self.stack.push(val)
+					self.stack.push(t)
+					self.stack.push(k)
+					self.stack.push(v)
+					self.Call(3, 0)
+					return
+				}
+			}
+		} else {
+			tbl.put(k, v)
+		}
+		return
+	}
 	if !raw {
 		if mf := getMetafield(t, "__newindex", self); mf != nil {
 			switch x := mf.(type) {
 			case *luaTable: // 如果元方法是表，把k和v写入表
 				self.setTable(x, k, v, false)
 			case *closure: // 如果元方法是函数，调用函数
+				self.stack.push(mf)
 				self.stack.push(t)
 				self.stack.push(k)
 				self.stack.push(v)
@@ -91,6 +115,17 @@ func (self *luaState) SetMetatable(idx int) {
 		setMetatable(val, tbl, self)
 	} else {
 		panic("table expected!")
+	}
+}
+
+func (self *luaState) NewMetatable(name string) {
+	//self.GetMetafield(LUA_REGISTRYINDEX, name)
+	if self.GetMetafield(LUA_REGISTRYINDEX, name) == LUA_TNIL {
+		self.CreateTable(0, 2)
+		self.PushString(name)
+		self.SetField(-2, "__name")
+		self.PushValue(-1)
+		self.SetField(LUA_REGISTRYINDEX, name)
 	}
 }
 
