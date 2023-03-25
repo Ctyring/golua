@@ -167,9 +167,9 @@ func cgBinopExp(fi *funcInfo, node *BinopExp, a int) {
 		cgExp(fi, node.Exp1, b, 1) // 处理左侧表达式
 		fi.freeReg()
 		if node.Op == TOKEN_OP_AND { // 判断是否需要短路
-			fi.emitTestSet(a, b, 0)
+			fi.emitTestSet(a, b, 0) // AND 在false时短路
 		} else {
-			fi.emitTestSet(a, b, 1)
+			fi.emitTestSet(a, b, 1) // OR 在true时短路
 		}
 		pcOfJmp := fi.emitJmp(0, 0) // 短路
 

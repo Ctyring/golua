@@ -55,7 +55,7 @@ func newFuncInfo(parent *funcInfo, fd *FuncDefExp) *funcInfo {
 }
 
 type locVarInfo struct {
-	prev     *locVarInfo // 前一个局部变量，实现单向链表
+	prev     *locVarInfo // 前一个同名局部变量
 	name     string      // 变量名
 	scopeLv  int         // 变量的作用域层级
 	slot     int         // 变量的寄存器索引
@@ -163,10 +163,10 @@ func (self *funcInfo) slotOfLocVar(name string) int {
 
 // 退出当前作用域
 func (self *funcInfo) exitScope() {
-	pendingBreakJmps := self.breaks[len(self.breaks)-1] // 获取末尾元素
-	self.breaks = self.breaks[:len(self.breaks)-1]      // 删除末尾元素
+	pendingBreakJmps := self.breaks[len(self.breaks)-1] // 获取末尾break数组(调用层最深的break语句组)
+	self.breaks = self.breaks[:len(self.breaks)-1]      // 删除末尾Break数组
 	a := self.getJmpArgA()                              // 是否需要关闭Upvalue
-	for _, pc := range pendingBreakJmps {               // 遍历末尾元素
+	for _, pc := range pendingBreakJmps {               // 遍历break数组
 		sBx := self.pc() - pc                     // 计算跳转偏移量
 		i := (sBx+MAXARG_sBx)<<14 | a<<6 | OP_JMP // 组装指令
 		self.insts[pc] = uint32(i)                // 修改指令(break的时候会生成指令，但不能确定跳转偏移量，所以先用0占位)
@@ -204,10 +204,10 @@ func (self *funcInfo) addBreakJmp(pc int) {
 
 // 获取JMP指令的A操作数，操作数A决定了Upvalue的数量
 func (self *funcInfo) getJmpArgA() int {
-	hasCapturedLocVars := false
-	minSlotOfLocVars := self.maxRegs
+	hasCapturedLocVars := false            // 是否有捕获的局部变量
+	minSlotOfLocVars := self.maxRegs       // 局部变量寄存器的最小索引
 	for _, locVar := range self.locNames { // 遍历局部变量名表
-		if locVar.scopeLv == self.scopeLv { // 作用域层级相同
+		if locVar.scopeLv == self.scopeLv { // 作用域层级相同，说明需要关闭
 			for v := locVar; v != nil && v.scopeLv == self.scopeLv; v = v.prev { // 遍历同名局部变量
 				if v.captured { // 是否被捕获
 					hasCapturedLocVars = true
