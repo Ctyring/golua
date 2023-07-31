@@ -1,9 +1,9 @@
 package main
 
 import (
+	"lua/src/Tools"
 	"lua/src/api"
 	. "lua/src/binchunk"
-	"lua/src/util"
 	"os"
 )
 
@@ -96,7 +96,7 @@ func pmain(L api.LuaState) int {
 	}
 	f := combine(L, len(os.Args))
 	if listing {
-		util.List(f)
+		Tools.List(f)
 	}
 	if dumping {
 		data := Dump(*f)

@@ -15,7 +15,7 @@ func (self *luaState) Load(chunk []byte, chunkName, mode string) int {
 	} else {
 		proto = Compile(string(chunk), chunkName) // 编译文本chunk
 	}
-	//util.List(proto)
+	//Tools.List(proto)
 	c := newLuaClosure(proto)
 	self.stack.push(c)
 	// 判断是否需要Upvalue
@@ -122,7 +122,7 @@ func (self *luaState) callGoClosure(nArgs, nResults int, c *closure) {
 func (self *luaState) runLuaClosure() {
 	for {
 		inst := Instruction(self.Fetch())
-		//util.PrintStack(self)
+		//Tools.PrintStack(self)
 		inst.Execute(self)
 		if inst.Opcode() == OP_RETURN {
 			break
