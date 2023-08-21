@@ -122,6 +122,7 @@ func baseSelect(ls LuaState) int {
 // ipairs (t)
 // http://www.lua.org/manual/5.3/manual.html#pdf-ipairs
 // lua-5.3.4/src/lbaselib.c#luaB_ipairs()
+// 只遍历连续的数组部分
 func baseIPairs(ls LuaState) int {
 	ls.CheckAny(1)
 	ls.PushGoFunction(iPairsAux) /* iteration function */
@@ -145,11 +146,12 @@ func iPairsAux(ls LuaState) int {
 // lua-5.3.4/src/lbaselib.c#luaB_pairs()
 func basePairs(ls LuaState) int {
 	ls.CheckAny(1)
-	if ls.GetMetafield(1, "__pairs") == LUA_TNIL { /* no metamethod? */
-		ls.PushGoFunction(baseNext) /* will return generator, */
+	if ls.GetMetafield(1, "__pairs") == LUA_TNIL { // 没有元方法
+		ls.PushGoFunction(baseNext) // 调用baseNext 返回表中下一个值
 		ls.PushValue(1)             /* state, */
 		ls.PushNil()
 	} else {
+		// 调用元方法
 		ls.PushValue(1) /* argument 'self' to metamethod */
 		ls.Call(1, 3)   /* get 3 values from metamethod */
 	}
